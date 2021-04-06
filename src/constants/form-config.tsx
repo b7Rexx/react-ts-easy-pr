@@ -1,21 +1,6 @@
+import { FormConfigType, FormConfig } from '../common/form-interface';
+
 export const REPLACE_ENCODE_INPUT = '@input@';
-
-export enum FormConfigType {
-  text,
-  link,
-  textarea,
-  checkbox
-}
-
-export interface FormConfig {
-  id: number | string;
-  type: FormConfigType;
-  title: string;
-  placeholder?: string;
-  value?: any;
-  output: string;
-  allowEmpty: boolean;
-}
 
 export const DEFAULT_CONFIG: Array<FormConfig> = [
   {
@@ -24,23 +9,14 @@ export const DEFAULT_CONFIG: Array<FormConfig> = [
     title: 'Title',
     placeholder: 'Add title here',
     value: '',
-    output: `### Title
-
-    ${REPLACE_ENCODE_INPUT}
-
-    `,
+    output: `### Title\n${REPLACE_ENCODE_INPUT}\n`,
     allowEmpty: false
   },
   {
     id: 1,
     type: FormConfigType.textarea,
     title: 'Description',
-    output: `
-    ### Description
-
-    ${REPLACE_ENCODE_INPUT}
-
-    `,
+    output: `#### Description\n${REPLACE_ENCODE_INPUT}\n`,
     value: '',
     allowEmpty: true
   },
@@ -48,18 +24,38 @@ export const DEFAULT_CONFIG: Array<FormConfig> = [
     id: 2,
     type: FormConfigType.link,
     title: 'Ticket Link',
-    output: `### Ticket
-
-    The related issue ticket link is [here](${REPLACE_ENCODE_INPUT}).
-    
-    `,
+    output: `#### Ticket\nThe related issue ticket link is [here](${REPLACE_ENCODE_INPUT}).\n`,
     allowEmpty: false
   },
   {
     id: 3,
+    type: FormConfigType.link,
+    title: 'Design Link',
+    output: `#### Design\nThe related design link is [here](${REPLACE_ENCODE_INPUT}).\n`,
+    allowEmpty: false
+  },
+  {
+    id: 4,
     type: FormConfigType.checkbox,
     title: 'Related to',
-    output: REPLACE_ENCODE_INPUT,
-    allowEmpty: false
+    output: `#### Related to\n${REPLACE_ENCODE_INPUT}\n`,
+    allowEmpty: false,
+    options: [
+      {
+        id: 0,
+        name: 'Android',
+        checked: false
+      },
+      {
+        id: 1,
+        name: 'IOS',
+        checked: false
+      },
+      {
+        id: 2,
+        name: 'Web',
+        checked: false
+      }
+    ]
   }
 ];
