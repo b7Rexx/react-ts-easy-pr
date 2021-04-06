@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, TextareaAutosize } from '@material-ui/core';
+import {
+  TextField,
+  TextareaAutosize,
+  Checkbox,
+  FormControlLabel
+} from '@material-ui/core';
 
-import { FormConfigType, FormConfig } from '../../constants/form-config';
+import {
+  FormConfigType,
+  FormConfig,
+  CheckboxOption
+} from '../../common/form-interface';
 
 type FormItemProps = {
   formItem: FormConfig;
@@ -16,15 +25,23 @@ function FormItem(props: FormItemProps) {
   }, [props.formItem.value]);
 
   const inputChangeHandler = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setInput(e.target.value);
     props.handleChange(e.target.value);
   };
 
   const textareaChangeHandler = (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ): void => {
-    setInput(e.target.value);
     props.handleChange(e.target.value);
+  };
+
+  const checkboxChangeHandler = (
+    option: CheckboxOption,
+    e: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    props.handleChange({
+      option,
+      checked: e.target.checked
+    });
   };
 
   const parseFormType = (formItem: FormConfig) => {
@@ -78,16 +95,21 @@ function FormItem(props: FormItemProps) {
         );
       case FormConfigType.checkbox:
         return (
-          <TextField
-            id={`form-item-${props.formItem.id}`}
-            label={props.formItem.title}
-            placeholder={props.formItem.placeholder ?? ''}
-            fullWidth
-            value={input ?? ''}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              inputChangeHandler(e)
-            }
-          />
+          props.formItem.options &&
+          props.formItem.options.map((option) => (
+            <FormControlLabel
+              key={`formitem-${props.formItem.id}-checkbox-${option.id}`}
+              control={
+                <Checkbox
+                  checked={option.checked}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    checkboxChangeHandler(option, e)
+                  }
+                />
+              }
+              label={option.name}
+            />
+          ))
         );
 
       default:

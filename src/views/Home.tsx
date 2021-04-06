@@ -1,15 +1,18 @@
-import gfm from 'remark-gfm';
 import React, { Component } from 'react';
+
+import gfm from 'remark-gfm';
 import ReactMarkdown from 'react-markdown';
 import { Grid, Button } from '@material-ui/core';
 import SettingsIcon from '@material-ui/icons/Settings';
 
 import FormItem from './components/FormItem';
-import { FormConfig, DEFAULT_CONFIG } from '../constants/form-config';
+import { DEFAULT_CONFIG } from '../constants/form-config';
+import { FormConfig, FormConfigType } from '../common/form-interface';
 
 type HomeProps = {};
 type HomeStates = {
   isGenerate: boolean;
+  firstInit: boolean;
   formConfig: Array<FormConfig>;
   previewText: string;
 };
@@ -19,6 +22,7 @@ class Home extends Component<HomeProps, HomeStates> {
     super(props);
     this.state = {
       isGenerate: false,
+      firstInit: true,
       formConfig: DEFAULT_CONFIG,
       previewText: ''
     };
@@ -40,24 +44,66 @@ class Home extends Component<HomeProps, HomeStates> {
   formItemChangeHandler(item: FormConfig, val: any) {
     let preview = '';
     const updatedForm = this.state.formConfig.map((fcitem) => {
-      const mappedFcItem = fcitem;
-      if (mappedFcItem.id === item.id) {
-        mappedFcItem.value = val;
-      }
-      if (mappedFcItem.allowEmpty) {
-        preview += mappedFcItem.output.replace('@input@', mappedFcItem.value);
-      }
-      if (!mappedFcItem.allowEmpty) {
-        if (mappedFcItem.value) {
-          preview += mappedFcItem.output.replace('@input@', mappedFcItem.value);
+      switch (fcitem.type) {
+        case FormConfigType.checkbox: {
+          const mappedFcCheckboxItem = fcitem;
+          let checkboxString = '';
+          if (this.state.firstInit || mappedFcCheckboxItem.id === item.id) {
+            if (mappedFcCheckboxItem.options) {
+              const updateCheckboxItems = mappedFcCheckboxItem.options.map(
+                (checkboxItem) => {
+                  if (val.option && checkboxItem.id === val.option.id) {
+                    checkboxString += `- [${val.checked ? 'x' : ' '}] ${
+                      checkboxItem.name
+                    }\n`;
+                    return { ...checkboxItem, checked: val.checked };
+                  }
+                  checkboxString += `- [${checkboxItem.checked ? 'x' : ' '}] ${
+                    checkboxItem.name
+                  }\n`;
+                  return checkboxItem;
+                }
+              );
+              mappedFcCheckboxItem.options = updateCheckboxItems;
+            }
+          }
+
+          preview += mappedFcCheckboxItem.output.replace(
+            '@input@',
+            checkboxString
+          );
+
+          return mappedFcCheckboxItem;
+        }
+
+        default: {
+          const mappedFcItem = fcitem;
+          if (mappedFcItem.id === item.id) {
+            mappedFcItem.value = val;
+          }
+          if (mappedFcItem.allowEmpty) {
+            preview += mappedFcItem.output.replace(
+              '@input@',
+              mappedFcItem.value
+            );
+          }
+          if (!mappedFcItem.allowEmpty) {
+            if (mappedFcItem.value) {
+              preview += mappedFcItem.output.replace(
+                '@input@',
+                mappedFcItem.value
+              );
+            }
+          }
+          return mappedFcItem;
         }
       }
-      return mappedFcItem;
     });
 
     this.setState((prevState) => ({
       ...prevState,
       isGenerate: false,
+      firstInit: false,
       formConfig: updatedForm,
       previewText: preview
     }));
